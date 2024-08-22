@@ -374,6 +374,31 @@ DetailsPageSlide();
     $('.all-filters-area').removeClass('open');
     $(".body-backdrop").removeClass('open');
   });
+  $(".all-filters-wrap a").on("click", function (event) {
+    event.preventDefault();
+    $("body").css("overflow", "auto");
+
+    if ($('.all-filters-area').hasClass('open') && typeof reloadListing !== 'undefined' && typeof setURL !== 'undefined') {
+
+      if(typeof change !== 'undefined' && change==1){//only when user change something
+        setURL();
+        //console.log("typeof showSection"+typeof showSection)
+        if(typeof showSection !== "undefined"){
+          console.log("called");
+          showSection();
+        }
+        reloadListing(true);
+        setSelectedFilters();
+        change = 0;
+        scrolled = 0;
+        if($(window).width()<1200)
+          $(window).scrollTop(0);
+      }
+    }
+
+    $('.all-filters-area').removeClass('open');
+    $(".body-backdrop").removeClass('open');
+  });
   const resetLGOnFloorPlanTable = function() {
     const start = (fp_current_page - 1) * fp_per_page;
     let count = 0;

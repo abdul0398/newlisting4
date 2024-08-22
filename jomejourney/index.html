@@ -130,12 +130,11 @@
               <div class="filter-area-header d-flex align-items-center d-xl-none">
                 <button class="btn-back-icon"></button>
                 <div class="title me-auto">Filter</div>
-                <a href="javascript:void(0)" class="btn-text px-0" onclick="clearAllFilters();">Clear All</a>
               </div>
               <div class="all-filters-wrap">
                 <div class="footer-btn">
-                  <a href="javascript:void(0)" class="btn w-100 btn-primary d-xl-none btn-filter" >
-                    View 59 Launches
+                  <a  class="btn w-100 btn-primary d-xl-none btn-filter" >
+                     Filter
                   </a>
                 </div>
                 <div class="panel-title-area d-none d-xl-block">
@@ -144,16 +143,7 @@
                 <!-- ALL FILTER WRAPPER -->
                 <div class="filter-fields-wrapper">
                   <!-- FILTER ITEM -->
-                  <div id="selectedFilters" class="selected-filter-bg filter-content-item d-xl-none">
-                    <div class="title">
-                      Selected Filter
-                      <button class="angle-btn fas fa-angle-down"></button>
-                    </div>
-                    <div class="filter-body">
-                      <ul class="selected-filter-2 reset-ul d-flex flex-wrap">
-                      </ul>
-                    </div>
-                  </div>
+                 
                   <!-- FILTER ITEM -->
                   <div class="filter-content-item has-opened">
                     <div class="title">
@@ -1145,56 +1135,6 @@
                     </div>
                   </div>
                   <!-- FILTER ITEM -->
-                  <div class="filter-content-item has-opened d-none">
-                    <div class="title">
-                      Total Bathrooms
-                      <span class="chip chip-sm chip-bg d-none">
-                        <span>0</span>
-                        <button class="btn-times filter-close-range" data-key="total_bathrooms"><i class="fas fa-times-circle"></i></button>
-                      </span>
-                      <div class="sm-title fw-400 toggle-with-parent"></div>
-                      <button class="angle-btn fas fa-angle-down"></button>
-                    </div>
-                    <div class="filter-body">
-                      <div class="needs-validation mt-16 d-flex">
-                        <div class="input_group" data-name="Bathrooms">
-                          <div class="input-style2 -min total-bathrooms">
-                            <span class="placeholder_text">Min. Bathrooms</span>
-                            <input id="min-total-bathrooms" type="text" class="form-control min-val numeric trigger-search curr" data-min="0" data-max="100" data-prefix="" data-postfix="" data-key="total_bathrooms_min"  data-text="Min Bathrooms">
-                          </div>
-                          <span class="sep">-</span>
-                          <div class="input-style2 -max total-bathrooms">
-                            <span class="placeholder_text">Max. Bathrooms</span>
-                            <input id="max-total-bathrooms" type="text" class="form-control max-val numeric trigger-search curr" data-min="0" data-max="100" data-prefix="" data-postfix="" data-key="total_bathrooms_max"  data-text="Max Bathrooms">
-                          </div>
-                        </div>
-                      </div>
-                      <p class="mt-1 error-message"></p>
-                    </div>
-                  </div>
-                  <!-- FILTER ITEM -->
-                  <div class="filter-content-item has-opened d-none">
-                    <div class="title">
-                      Unit Attributes
-                      <span class="chip chip-sm chip-bg d-none">
-                        <span>0</span>
-                        <button class="btn-times filter-close" data-key="unit_attribute"><i class="fas fa-times-circle"></i></button>
-                      </span>
-                      <div class="sm-title fw-400 toggle-with-parent"></div>
-                      <button class="angle-btn fas fa-angle-down"></button>
-                    </div>
-                    <div class="filter-body">
-                      <ul id="expanded-unit-attribute" data-each-show="5" class="check-box-lists mt-16">
-                                                                        <li class="list-item form-check">
-                          <input class="form-check-input trigger-search" type="checkbox" value="2" id="unit-attribute-check-box-2" data-key="unit_attribute"  data-text="Open Concept Kitchen" >
-                          <label class="form-check-label" for="unit-attribute-check-box-2">
-                            Open Concept Kitchen
-                          </label>
-                        </li>
-                                                                      </ul>
-                                          </div>
-                  </div>
-                  <!-- FILTER ITEM -->
                   <div class="filter-content-item has-opened">
                     <div class="title">
                       Completion Status
@@ -1263,26 +1203,26 @@
                     </div>
                     <div class="filter-body">
                       <ul id="expanded-project-tenure" data-each-show="5" class="check-box-lists mt-16">
-                                                <li class="list-item form-check">
-                          <input class="form-check-input trigger-search" type="checkbox" value="1" id="tenure-check-box-1" data-key="tenure"  data-text="99 Years">
+                        <li class="list-item form-check">
+                          <input class="form-check-input trigger-search" type="checkbox" value="1" id="tenure-check-box-1" data-key="tenure"  data-text="99 Years Leasehold">
                           <label class="form-check-label" for="tenure-check-box-1">
                             99 Years
                           </label>
                         </li>
-                                                <li class="list-item form-check">
-                          <input class="form-check-input trigger-search" type="checkbox" value="2" id="tenure-check-box-2" data-key="tenure"  data-text="999 Years">
+                        <li class="list-item form-check">
+                          <input class="form-check-input trigger-search" type="checkbox" value="2" id="tenure-check-box-2" data-key="tenure"  data-text="999 Years Leasehold">
                           <label class="form-check-label" for="tenure-check-box-2">
                             999 Years
                           </label>
                         </li>
-                                                <li class="list-item form-check">
-                          <input class="form-check-input trigger-search" type="checkbox" value="3" id="tenure-check-box-3" data-key="tenure"  data-text="Freehold">
+                        <li class="list-item form-check">
+                          <input class="form-check-input trigger-search" type="checkbox" value="3" id="tenure-check-box-3" data-key="tenure"  data-text="Freehold Status">
                           <label class="form-check-label" for="tenure-check-box-3">
                             Freehold
                           </label>
                         </li>
-                                              </ul>
-                                          </div>
+                      </ul>
+                    </div>
                   </div>
                   <!-- FILTER ITEM -->
                   <div class="filter-content-item has-opened">
@@ -1297,38 +1237,38 @@
                     </div>
                     <div class="filter-body">
                       <ul id="expanded-project-size" data-each-show="5" class="check-box-lists mt-16">
-                                                <li class="list-item form-check">
+                        <li class="list-item form-check">
                           <input class="form-check-input trigger-search" type="checkbox" value="1" id="size-check-box-1" data-key="project_size" data-text="0 - 99 Units">
                           <label class="form-check-label" for="size-check-box-1">
                             0 - 99 Units
                           </label>
                         </li>
-                                                <li class="list-item form-check">
+                        <li class="list-item form-check">
                           <input class="form-check-input trigger-search" type="checkbox" value="2" id="size-check-box-2" data-key="project_size" data-text="100 - 399 Units">
                           <label class="form-check-label" for="size-check-box-2">
                             100 - 399 Units
                           </label>
                         </li>
-                                                <li class="list-item form-check">
+                        <li class="list-item form-check">
                           <input class="form-check-input trigger-search" type="checkbox" value="3" id="size-check-box-3" data-key="project_size" data-text="400 - 699 Units">
                           <label class="form-check-label" for="size-check-box-3">
                             400 - 699 Units
                           </label>
                         </li>
-                                                <li class="list-item form-check">
+                        <li class="list-item form-check">
                           <input class="form-check-input trigger-search" type="checkbox" value="4" id="size-check-box-4" data-key="project_size" data-text="700 - 999 Units">
                           <label class="form-check-label" for="size-check-box-4">
                             700 - 999 Units
                           </label>
                         </li>
-                                                <li class="list-item form-check">
+                        <li class="list-item form-check">
                           <input class="form-check-input trigger-search" type="checkbox" value="5" id="size-check-box-5" data-key="project_size" data-text="1000 &amp; Above Units">
                           <label class="form-check-label" for="size-check-box-5">
                             1000 &amp; Above Units
                           </label>
                         </li>
-                                              </ul>
-                                          </div>
+                        </ul>
+                    </div>
                   </div>
                   <!-- FILTER ITEM -->
                   <div class="filter-content-item has-opened  d-none ">
@@ -1364,7 +1304,6 @@
                 <a href="javascript:void(0)" class="open-filter-area d-flex align-items-center btn-outline-light d-xl-none me-2 me-sm-3">
                   <span class="icon-settings"></span>
                   Filter
-                  <span class="baudge-rounded d-flex align-items-center justify-content-center total-filter">0</span>
                 </a>
                 <!-- <a href="javascript:void(0)" class="open-sort-area filter-input-show sort-filter-show btn-outline-light d-xl-none d-flex align-items-center">
                   <span class="abs d-flex align-items-center">
@@ -1402,9 +1341,6 @@
               <ul class="selected-filters-wrap d-flex flex-xl-wrap">
                
               </ul>
-              <div class="clear-btn d-flex d-xl-none align-items-center clear-all-filter">
-                <span class="btn-text"><a onclick="clearAllFilters();">Clear All</a></span>
-              </div>
             </div>
             <div class="card-listing" id="card-listing">
                             <!-- Listing Start -->

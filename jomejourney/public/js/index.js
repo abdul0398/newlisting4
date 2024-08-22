@@ -1,77 +1,84 @@
 let listings;
 let names = [];
+
+
+
 (async () => {
-    const data = await fetchListings();
-    listings = data.listings;
-    populateListings(listings)
-    addFiltersEvent();
-    populateFiltersValue()
-    
+  const data = await fetchListings();
+  listings = data.listings;
+  console.log(listings)
+  populateListings(listings);
+  addFiltersEvent();
+  populateFiltersValue();
 })();
 
-
-
-
-
-async function fetchListings(){
-    const options = {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + 'cbvlagfusboas7d6f9234ksjdfhkj8979872k3b32b4jhgl987bn'
-        },
-        cors:'no-cors'
-    
+async function fetchListings() {
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization:
+        "Bearer " + "cbvlagfusboas7d6f9234ksjdfhkj8979872k3b32b4jhgl987bn",
+    },
+    cors: "no-cors",
+  };
+  try {
+    const res = await fetch(
+      "https://api.jomejourney-portal.com/api/listings?page=all",
+      options
+    );
+    const data = await res.json();
+    if (res.status == 200) {
+      return data;
     }
-    try {
-        const res = await fetch('https://api.jomejourney-portal.com/api/listings?page=all', options);
-        const data = await res.json();
-        if(res.status == 200){
-            return data;
-        }
-    } catch (error) {
-        console.log("Error fetching new listings", error);
-        return [];
-    }
+  } catch (error) {
+    console.log("Error fetching new listings", error);
+    return [];
+  }
 }
 
+function populateListings(listings) {
+  names = [];
+  document.querySelector(".number-of-listings").innerText = listings.length;
 
-function populateListings(listings){
+  const listings_container = document.querySelector(".card-listing");
 
-    names = [];
-    document.querySelector('.number-of-listings').innerText = listings.length
+  listings_container.innerHTML = "";
+  const fragment = document.createDocumentFragment();
+  for (const listing of listings) {
+    const address = listing?.details[0].para + ", " + listing?.details[1].para;
+    const name = listing.name;
+    const nearestMRT =
+      listing?.location_map?.amenities?.find(
+        (detail) => detail.Category == "MRT Stations"
+      ) || null;
+    const image_url = `https://api.jomejourney-portal.com${listing.images[0] ? listing.images[0] : listing.images[1]
+      }`;
+    const totalUnits =
+      listing?.unit_mix?.data.find((unit) => unit.unitType == "Overall")
+        ?.totalUnits || 0;
+    const availableUnits =
+      listing?.balance_units?.data.find((unit) => unit.unitType == "Overall")
+        ?.availableUnits || 0;
+    const unitsSold = totalUnits - availableUnits;
+    const unit_mixes = listing.balance_units?.data;
+    const developer = listing.developer;
+    names.push(name);
 
-    const listings_container = document.querySelector(".card-listing");
-    
+    const template = document.createElement("template");
 
-    listings_container.innerHTML = "";
-    const fragment = document.createDocumentFragment();
-    for (const listing of listings) {
-        const address = listing?.details[0].para + ', ' + listing?.details[1].para ;
-        const name = listing.name;
-        const nearestMRT = listing?.location_map?.amenities?.find(detail => detail.Category == "MRT Stations") || null;
-        const image_url = `https://api.jomejourney-portal.com${listing.images[0]? listing.images[0] : listing.images[1]}`
-        const totalUnits = listing?.unit_mix?.data.find(unit => unit.unitType == "Overall")?.totalUnits || 0;
-        const availableUnits = listing?.balance_units?.data.find(unit => unit.unitType == "Overall")?.availableUnits || 0;
-        const unitsSold = totalUnits - availableUnits;
-        const unit_mixes = listing.balance_units?.data;
-        const developer = listing.developer
-        names.push(name)
+    let unit_mix_html = "";
 
-        const template = document.createElement('template');
+    const unit_mix_html_array = unit_mixes.map((item) => {
+      const psf = item.psf;
+      const price = item.price;
+      const unitType = item.unitType;
+      const sqft = item.size_sqft;
 
-        let unit_mix_html = '';
-
-        const unit_mix_html_array = unit_mixes.map(item => {
-            const psf = item.psf;
-            const price = item.price;
-            const unitType = item.unitType;
-            const sqft = item.size_sqft;
-        
-            if (unitType === "Overall") {
-                return "";
-            }
-            return `
+      if (unitType === "Overall") {
+        return "";
+      }
+      return `
                 <div class="text-slide-wrapper disable-scrollbar" id="checkWidth" style="border-top: 1px solid #ccc; border-bottom:1px solid #ccc;">
                     <div class="text-slide-container swiper-container">
                         <div class="swiper-wrapper"> <!-- Missing opening '<' added -->
@@ -92,18 +99,12 @@ function populateListings(listings){
                     </div>
                 </div>
             `;
-        });
-        
-        unit_mix_html = unit_mix_html_array.join("");
-        
+    });
 
+    unit_mix_html = unit_mix_html_array.join("");
 
-
-
-
-
-        // populate listings
-            const htmlString =  ` <div project-name='${name}' class="card-primary mb-4">
+    // populate listings
+    const htmlString = ` <div project-name='${name}' class="card-primary mb-4">
                     <!-- Card Header -->
                     <a href="project/?id=${listing.id}" target="_blank" class="detailhref">
                     <div class="card-header">
@@ -204,340 +205,586 @@ function populateListings(listings){
                         </div>
                     </div>
                     </a>
-                    </div>`
+                    </div>`;
 
-            template.innerHTML = htmlString
+    template.innerHTML = htmlString;
 
-            fragment.appendChild(template.content);
-        }
-        listings_container.appendChild(fragment);
+    fragment.appendChild(template.content);
+  }
+  listings_container.appendChild(fragment);
 }
-
-
-
-
-
-
-
 
 function addFiltersEvent() {
-    
-    // Add project name listener
-    const search_project = document.getElementById("search-project-name");
-    const project_name_container = document.getElementById('expanded-project-name');
+  // Add project name listener
+  const search_project = document.getElementById("search-project-name");
+  const project_name_container = document.getElementById(
+    "expanded-project-name"
+  );
 
-    const handle_search_project = debounce(() => {
-        const children = project_name_container.querySelectorAll('li');
-        const filteredItems = Array.from(children).filter(item => 
-            item.querySelector('label').innerText.toLowerCase().includes(search_project.value.toLowerCase())
-        );
+  const handle_search_project = debounce(() => {
+    const children = project_name_container.querySelectorAll("li");
+    const filteredItems = Array.from(children).filter((item) =>
+      item
+        .querySelector("label")
+        .innerText.toLowerCase()
+        .includes(search_project.value.toLowerCase())
+    );
 
-        children.forEach(child => {
-            child.style.display = filteredItems.includes(child) ? '' : 'none';
-        });
+    children.forEach((child) => {
+      child.style.display = filteredItems.includes(child) ? "" : "none";
+    });
+  }, 500);
 
-        
-
-    }, 500);
-    
-    search_project.addEventListener("input", handle_search_project);
+  search_project.addEventListener("input", handle_search_project);
 }
-
 
 function debounce(func, delay) {
-    let timeoutId;
+  let timeoutId;
 
-    return function (...args) {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-            func.apply(this, args);
-        }, delay);
-    };
+  return function (...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func.apply(this, args);
+    }, delay);
+  };
 }
 
+function populateFiltersValue() {
+  const project_name_filter = document.getElementById("expanded-project-name");
+  project_name_filter.innerHTML = "";
 
-function populateFiltersValue(){
-    const project_name_filter = document.getElementById('expanded-project-name');
-    project_name_filter.innerHTML = "";
-
-
-    names.forEach(name=>{
-        project_name_filter.innerHTML += ` <li class="list-item form-check">
+  names.forEach((name) => {
+    project_name_filter.innerHTML += ` <li class="list-item form-check">
         <input onclick="filterListings(this)" class="form-check-input " type="checkbox" id="project-check-box-${name}" data-text="${name}">
             <label class="form-check-label" for="project-check-box-${name}">
                 ${name}
             </label>
-        </li>`
-    })
+        </li>`;
+  });
 }
 
-
-
 const filterListings = (input) => {
-    if (input) {
-        addFilterMarker(input);
+  const value_size_map = {
+    "1":"0-99",
+    "2":"100-399",
+    "3":"400-699",
+    "4":"700-999",
+    "5":"1000-10000000"
+  }
+  
+  if (input) {
+    addFilterMarker(input);
+  }
+
+  const project_name_checkboxs = document.querySelectorAll(
+    "#expanded-project-name input"
+  );
+
+  // project names filters
+  const project_names_checked = [];
+  project_name_checkboxs.forEach((input) => {
+    const name = input.getAttribute("data-text");
+    if (input.checked) {
+      project_names_checked.push(name);
+    }
+  });
+
+  // region filters
+  const region_checkboxs = document.querySelectorAll(
+    "#expanded-project-segment input"
+  );
+
+  const region_checked = [];
+  region_checkboxs.forEach((input) => {
+    const name = input.getAttribute("data-text");
+    if (input.checked) {
+      region_checked.push(name);
+    }
+  });
+
+  // location filters
+  const all_locations_inputs = document.querySelectorAll(".cb-district");
+
+  const location_checked = [];
+  all_locations_inputs.forEach((input) => {
+    const name = input.getAttribute("data-text");
+    if (input.checked) {
+      location_checked.push(name);
+    }
+  });
+
+  // mrt ditance filters
+  const min_mrt_distance = document.getElementById("min-mrt-distance").value.replace(/,/g, "");
+  const max_mrt_distance = document.getElementById("max-mrt-distance").value.replace(/,/g, "");
+
+  // unit category
+  const unit_inputs = document.querySelectorAll(
+    "#expanded-unit-category input"
+  );
+  const units_category_checked = [];
+  unit_inputs.forEach((input) => {
+    const name = input.getAttribute("data-text");
+    if (input.checked) {
+      units_category_checked.push(name);
+    }
+  });
+
+  // unit price
+  const min_unit_price = document
+    .getElementById("min-unit-price")
+    .value.replace(/,/g, "");
+  const max_unit_price = document
+    .getElementById("max-unit-price")
+    .value.replace(/,/g, "");
+
+  // unit psf
+  const min_unit_psf = document
+    .getElementById("min-unit-psf")
+    .value.replace(/,/g, "");
+  const max_unit_psf = document
+    .getElementById("max-unit-psf")
+    .value.replace(/,/g, "");
+
+  // unit size
+  const min_unit_size = document
+    .getElementById("min-unit-size")
+    .value.replace(/,/g, "");
+  const max_unit_size = document
+    .getElementById("max-unit-size")
+    .value.replace(/,/g, "");
+
+  // bedrooms
+  const min_total_bedrooms = document
+    .getElementById("min-total-bedrooms")
+    .value.replace(/,/g, "");
+  const max_total_bedrooms = document
+    .getElementById("max-total-bedrooms")
+    .value.replace(/,/g, "");
+
+
+  // completed and uncompleted
+  const completed_checkbox = document.getElementById(
+    "check-box-CoProjects"
+  ).checked;
+  const uncompleted_checkbox = document.getElementById(
+    "check-box-UnProjects"
+  ).checked;
+
+
+  // TOP year
+  const min_completion_year = document
+    .getElementById("min-completion-year")
+    .value.replace(/,/g, "");
+  const max_completion_year = document
+    .getElementById("max-completion-year")
+    .value.replace(/,/g, "");
+
+
+ // tenure
+  const tenure_inputs = document.querySelectorAll(
+    "#expanded-project-tenure input"
+  );
+  const tenure_inputs_checked = [];
+  tenure_inputs.forEach((input) => {
+    const name = input.getAttribute("data-text");
+    if (input.checked) {
+      tenure_inputs_checked.push(name);
+    }
+  });
+
+
+  // project Size
+  const size_inputs = document.querySelectorAll(
+    "#expanded-project-size input"
+  );
+  const size_inputs_checked = [];
+  size_inputs.forEach((input) => {
+    const value = input.value;
+    if (input.checked) {
+      size_inputs_checked.push(value);
+    }
+  });
+
+  const filter_listings = listings.filter((listing) => {
+    if (
+      project_names_checked.length == 0 &&
+      region_checked.length == 0 &&
+      location_checked.length == 0 &&
+      min_mrt_distance == "" &&
+      max_mrt_distance == "" &&
+      units_category_checked.lenght == 0 &&
+      min_unit_price == "" &&
+      max_unit_price == "" &&
+      min_unit_psf == "" &&
+      max_unit_psf == "" &&
+      min_unit_size == "" &&
+      max_unit_size == "" &&
+      min_total_bedrooms == "" &&
+      max_total_bedrooms == "" &&
+      completed_checkbox == false &&
+      uncompleted_checkbox == false &&
+      min_completion_year == "" &&
+      max_completion_year == "" && 
+      is_tenure_matched.length == 0
+    ) {
+      return true;
     }
 
-    const project_name_checkboxs = document.querySelectorAll("#expanded-project-name input");
-
-
-    // project names filters
-    const project_names_checked = [];
-    project_name_checkboxs.forEach((input) => {
-        const name = input.getAttribute('data-text');
-        if (input.checked) {
-            project_names_checked.push(name);
+    const { region, location, top, tenure, size } = listing?.details?.reduce(
+      (acc, detail) => {
+        if (detail.title === "Market Segment") {
+          acc.region = detail;
+        } else if (detail.title === "Postal District") {
+          acc.location = detail;
+        } else if (detail.title == "Expected TOP") {
+          acc.top = detail;
+        }else if(detail.title == "Land Tenure"){
+          acc.tenure = detail;
+        }else if(detail.title == "Development Size"){
+          acc.size = detail;
         }
+        return acc;
+      },
+      { region: null, location: null, top:null, tenure: null, size:null }
+    );
+
+    const mrt_distance = listing?.location_map?.amenities
+      ?.find((item) => {
+        if (item.Category == "MRT Stations") {
+          return true;
+        }
+      })
+      ?.Distance?.split("km")?.[0];
+
+    const project_category = listing?.project_category;
+
+    const price_data = listing?.balance_units?.data.find((item) => {
+      if (item.unitType == "Overall") {
+        return true;
+      }
     });
 
-
-    // region filters
-    const region_checkboxs = document.querySelectorAll('#expanded-project-segment input');
-
-    const region_checked = [];
-    region_checkboxs.forEach((input) => {
-        const name = input.getAttribute('data-text');
-        if (input.checked) {
-            region_checked.push(name);
-        }
+    const bedroom_data = listing?.balance_units?.data.map((item) => {
+      if (item.unitType == "Overall") {
+        return "";
+      }
+      return item.unitType;
     });
 
+    const unique_rooms = extractUniqueRooms(bedroom_data);
 
-    // location filters
-    const all_locations_inputs = document.querySelectorAll(".cb-district");
+    const isCompleted = listing?.project_status || "completed";
 
-    const location_checked = [];
-    all_locations_inputs.forEach((input) => {
-        const name = input.getAttribute('data-text');
-        if (input.checked) {
-            location_checked.push(name);
-        }
-    });
+    const price = price_data?.price;
+    const psf = price_data?.psf;
+    const unit_size = price_data?.size_sqft;
 
+    const { upper_range: upper_range_price } = getLowerAndUpperPrice(price);
+    const { upper_range: upper_range_psf } = getLowerAndUpperPrice(psf);
+    const { upper_range: upper_range_size } = getLowerAndUpperPrice(unit_size);
+    const completion_year = extractYear(top?.para)
+    const unit_numbs = extractUnitsNumber(size?.para || "");
 
-    // mrt ditance filters
-    const min_mrt_distance = document.getElementById('min-mrt-distance').value;
-    const max_mrt_distance = document.getElementById('max-mrt-distance').value;
+    console.log(unit_numbs)
 
+    const is_name_found =
+      project_names_checked.length === 0 ||
+      project_names_checked.includes(listing.name);
+    const is_region_found =
+      region_checked.length === 0 ||
+      (region && region_checked.includes(region.para));
+    const is_location_found =
+      location_checked.length === 0 ||
+      (location && location_checked.includes(location.para));
+    const is_max_dis_matched =
+      max_mrt_distance == "" || mrt_distance * 1000 <= max_mrt_distance;
+    const is_min_dis_matched =
+      min_mrt_distance == "" || mrt_distance * 1000 >= min_mrt_distance;
+    const is_unit_category_matched =
+      units_category_checked.length == 0 ||
+      units_category_checked.includes(project_category);
+    const is_max_pric_matched =
+      max_unit_price == "" || upper_range_price <= max_unit_price;
+    const is_min_pric_matched =
+      min_unit_price == "" || upper_range_price >= min_unit_price;
+    const is_max_psf_matched =
+      max_unit_psf == "" || upper_range_psf <= max_unit_psf;
+    const is_min_psf_matched =
+      min_unit_psf == "" || upper_range_psf >= min_unit_psf;
+    const is_max_size_matched =
+      max_unit_size == "" || upper_range_size <= max_unit_size;
+    const is_min_size_matched =
+      min_unit_size == "" || upper_range_size >= min_unit_size;
+    const is_max_bed_matched =
+      max_total_bedrooms == "" ||
+      unique_rooms[unique_rooms.length - 1] == max_total_bedrooms;
+    const is_min_bed_matched =
+      min_total_bedrooms == "" || unique_rooms[0] == min_total_bedrooms;
+    const is_completed_matched =
+      completed_checkbox == uncompleted_checkbox ||
+      (completed_checkbox
+        ? isCompleted == "Completed"
+        : isCompleted == "Uncompleted");
+    const is_min_comp_matched = min_completion_year == "" || !completion_year || parseInt(completion_year) >= parseInt(min_completion_year);
+    const is_max_comp_matched = max_completion_year == "" || !completion_year || parseInt(completion_year) <= parseInt(max_completion_year);
 
-    // unit category
-    const unit_inputs = document.querySelectorAll('#expanded-unit-category input');
-    const units_category_checked = [];
-    unit_inputs.forEach((input) => {
-        const name = input.getAttribute('data-text');
-        if (input.checked) {
-            units_category_checked.push(name);
-        }
-    });
+    const is_tenure_matched = tenure_inputs_checked.length == 0 || tenure_inputs_checked.includes(tenure.para);
 
-    // unit price 
-    const min_unit_price = document.getElementById('min-unit-price').value.replace(/,/g, '');
-    const max_unit_price = document.getElementById('max-unit-price').value.replace(/,/g, '');
     
 
-    const filter_listings = listings.filter(listing => {
-        if (project_names_checked.length == 0 && region_checked.length == 0 && location_checked.length == 0 && min_mrt_distance == "" && max_mrt_distance == "" && units_category_checked.lenght == 0 && min_unit_price == "" && max_unit_price == "") {
-            return true;
-        }
 
-        const { region, location } = listing?.details?.reduce((acc, detail) => {
-            if (detail.title === "Market Segment") {
-                acc.region = detail;
-            } else if (detail.title === "Postal District") {
-                acc.location = detail;
-            }
-            return acc;
-        }, { region: null, location: null });
+    return (
+      is_name_found &&
+      is_region_found &&
+      is_location_found &&
+      is_max_dis_matched &&
+      is_min_dis_matched &&
+      is_unit_category_matched &&
+      is_max_pric_matched &&
+      is_min_pric_matched &&
+      is_max_psf_matched &&
+      is_min_psf_matched &&
+      is_max_size_matched &&
+      is_min_size_matched &&
+      is_max_bed_matched &&
+      is_min_bed_matched &&
+      is_completed_matched &&
+      is_min_comp_matched &&
+      is_max_comp_matched && 
+      is_tenure_matched
+    );
+  });
 
-        const mrt_distance = listing?.location_map?.amenities?.find(item=>{
-            if(item.Category == "MRT Stations"){
-                return true;
-            }
-        })?.Distance?.split('km')?.[0]
-
-        const project_category = listing?.project_category;
-
-        const price_data = listing?.balance_units?.data.find(item=>{
-            if(item.unitType == "Overall"){
-                return true;
-            }
-        })?.price
-
-        const { lower_range,  upper_range }  = getLowerAndUpperPrice(price_data)
-
-
-        const is_name_found = project_names_checked.length === 0 || project_names_checked.includes(listing.name);
-        const is_region_found = region_checked.length === 0 || (region && region_checked.includes(region.para));
-        const is_location_found = location_checked.length === 0 || (location && location_checked.includes(location.para));
-        const is_min_dis_matched = min_mrt_distance == "" || mrt_distance * 1000 >= min_mrt_distance; 
-        const is_max_dis_matched = max_mrt_distance == "" || mrt_distance * 1000 <= max_mrt_distance;
-        const is_unit_category_matched = units_category_checked.length == 0 || units_category_checked.includes(project_category);
-        const is_max_pric_matched = max_unit_price == "" || (upper_range <= max_unit_price);
-        const is_min_pric_matched = min_unit_price == "" || (upper_range >= min_unit_price);
-
-
-        return is_name_found && 
-        is_region_found &&
-        is_location_found && 
-        is_max_dis_matched && 
-        is_min_dis_matched && 
-        is_unit_category_matched && 
-        is_max_pric_matched && 
-        is_min_pric_matched;
-    });
-
-    populateListings(filter_listings);
+  populateListings(filter_listings);
 };
 
+function addFilterMarker(input) {
+  const container = document.querySelector(".selected-filters-wrap");
+  const id = input.getAttribute("id");
+  const name = input.getAttribute("data-text");
 
+  if (
+    (input.type == "checkbox" && input.checked == false) ||
+    (input.type == "text" && input.value == "")
+  ) {
+    const liElement = document.querySelector(`li[data-chip="${id}"]`);
+    liElement?.remove();
+    return;
+  }
 
+  if (input.type == "text") {
+    const if_already_present = document.querySelector(`li[data-chip="${id}"]`);
+    if_already_present?.remove();
+  }
 
-function addFilterMarker(input){
-    const container = document.querySelector('.selected-filters-wrap');
-    const id = input.getAttribute("id") 
-    const name = input.getAttribute("data-text") ;
+  const template = document.createElement("template");
 
-    if((input.type == "checkbox" && input.checked == false) || (input.type == 'text' && input.value == "")){
-        const liElement = document.querySelector(`li[data-chip="${id}"]`);
-        liElement?.remove();
-        return;
-    }
-    
-    if(input.type == 'text'){
-        const if_already_present = document.querySelector(`li[data-chip="${id}"]`);
-        if_already_present?.remove();
-    }
-
-
-    const template = document.createElement('template');
-
-   template.innerHTML = `
+  template.innerHTML = `
     <li class="chip" data-chip="${id}">
         ${name}
         <button onclick="removeFilter(this)" class="btn-times filter-close-text">
         <i class="fas fa-times-circle"></i>
         </button>
-    </li>`
+    </li>`;
 
-    container.appendChild(template.content)
+  container.appendChild(template.content);
 }
 
+function removeFilter(btn) {
+  const parent = btn.parentElement;
+  const id = parent.getAttribute("data-chip");
 
+  const input = document.getElementById(id);
+  if (input.type == "checkbox") {
+    input.checked = false;
+  } else {
+    input.value = "";
+  }
+  parent.remove();
 
-
-function removeFilter(btn){
-    const parent = btn.parentElement;
-    const id = parent.getAttribute("data-chip");
-
-    const input = document.getElementById(id);
-    if(input.type == 'checkbox'){
-        input.checked = false;
-    }else{
-        input.value = "";
-    }
-    parent.remove();
-
-    filterListings();
+  filterListings();
 }
 
+(() => {
+  // location event listener on outer checkbox
+  const all_outer_locations_inputs = document.querySelectorAll(".cb-region");
+  all_outer_locations_inputs.forEach((input) => {
+    input.addEventListener("input", () => {
+      const is_checked = input.checked;
+      const ul = input.parentElement.nextElementSibling;
+      const inputs = ul.querySelectorAll("input");
+      inputs.forEach((inner_input) => {
+        inner_input.checked = is_checked;
+        addFilterMarker(inner_input);
+      });
+      filterListings();
+    });
+  });
 
-(()=>{
+  // location event listener on inner checkbox
+  const all_inner_locations_inputs = document.querySelectorAll(".cb-district");
+  all_inner_locations_inputs.forEach((input) => {
+    input.addEventListener("input", () => {
+      filterListings(input);
+    });
+  });
 
-    // location event listener on outer checkbox
-    const all_outer_locations_inputs = document.querySelectorAll('.cb-region');
-    all_outer_locations_inputs.forEach(input=>{
-        input.addEventListener("input", ()=>{
-            const is_checked = input.checked;
-            const ul = input.parentElement.nextElementSibling;
-            const inputs = ul.querySelectorAll('input')
-            inputs.forEach(inner_input=>{
-                inner_input.checked = is_checked
-                addFilterMarker(inner_input);
-            })
-            filterListings();
-        })
-    })
+  // initialise mrt distance listener
+  const min_mrt_distance = document.getElementById("min-mrt-distance");
+  const max_mrt_distance = document.getElementById("max-mrt-distance");
+
+  function removeNonNumeric() {
+    let phoneNumber = this.value.replace(/\D/g, "");
+    phoneNumber = phoneNumber.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    this.value = phoneNumber;
+    filterListings(this);
+  }
+
+  min_mrt_distance.addEventListener("input", removeNonNumeric);
+  max_mrt_distance.addEventListener("input", removeNonNumeric);
+
+  // unit category listener
+  const unit_inputs = document.querySelectorAll(
+    "#expanded-unit-category input"
+  );
+  unit_inputs.forEach((input) => {
+    input.addEventListener("input", () => {
+      filterListings(input);
+    });
+  });
+
+  // unit price listener
+  const min_unit_price = document.getElementById("min-unit-price");
+  const max_unit_price = document.getElementById("max-unit-price");
+
+  min_unit_price.addEventListener("input", removeNonNumeric, 500);
+  max_unit_price.addEventListener("input", removeNonNumeric, 500);
+
+  // unit psf listener
+  const min_unit_psf = document.getElementById("min-unit-psf");
+  const max_unit_psf = document.getElementById("max-unit-psf");
+
+  min_unit_psf.addEventListener("input", removeNonNumeric, 500);
+  max_unit_psf.addEventListener("input", removeNonNumeric, 500);
+
+  // unit size listener
+  const min_unit_size = document.getElementById("min-unit-size");
+  const max_unit_size = document.getElementById("max-unit-size");
+
+  min_unit_size.addEventListener("input", removeNonNumeric, 500);
+  max_unit_size.addEventListener("input", removeNonNumeric, 500);
+
+  // bedroom listener
+  const min_total_bedrooms = document.getElementById("min-total-bedrooms");
+  const max_total_bedrooms = document.getElementById("max-total-bedrooms");
+
+  min_total_bedrooms.addEventListener("input", removeNonNumeric, 500);
+  max_total_bedrooms.addEventListener("input", removeNonNumeric, 500);
+
+  // completed and uncompleted
+  const completed_checkbox = document.getElementById("check-box-CoProjects");
+  const uncompleted_checkbox = document.getElementById("check-box-UnProjects");
+
+  completed_checkbox.addEventListener("input", () =>
+    filterListings(completed_checkbox)
+  );
+  uncompleted_checkbox.addEventListener("input", () =>
+    filterListings(uncompleted_checkbox)
+  );
+
+  // TOP year
+  const min_completion_year = document.getElementById("min-completion-year");
+  const max_completion_year = document.getElementById("max-completion-year");
+
+  min_completion_year.addEventListener("input", removeNonNumeric, 500);
+  max_completion_year.addEventListener("input", removeNonNumeric, 500);
 
 
-    // location event listener on inner checkbox
-    const all_inner_locations_inputs = document.querySelectorAll(".cb-district");
-    all_inner_locations_inputs.forEach(input=>{
-        input.addEventListener("input", ()=>{
-            filterListings(input);
-        })
-    })
+  // Tenure 
+  const tenure_inputs = document.querySelectorAll(
+    "#expanded-project-tenure input"
+  );
+  tenure_inputs.forEach((input) => {
+    input.addEventListener("input", () => {
+      filterListings(input);
+    });
+  });
+
+  // project_size 
+  const size_inputs = document.querySelectorAll(
+    "#expanded-project-size input"
+  );
+  size_inputs.forEach((input) => {
+    input.addEventListener("input", () => {
+      filterListings(input);
+    });
+  });
+
+})();
 
 
 
-    // initialise mrt distance listener
-    const min_mrt_distance = document.getElementById('min-mrt-distance');
-    const max_mrt_distance = document.getElementById('max-mrt-distance');
 
-    function removeNonNumeric() {
-        let phoneNumber = this.value.replace(/\D/g, '');
-        phoneNumber = phoneNumber.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        this.value = phoneNumber;
-        filterListings(this);
-    }
-    
-    min_mrt_distance.addEventListener('input',removeNonNumeric);
-    max_mrt_distance.addEventListener('input',removeNonNumeric);
-
-
-
-    // unit category listener 
-    const unit_inputs = document.querySelectorAll('#expanded-unit-category input');
-    unit_inputs.forEach(input=>{
-        input.addEventListener("input", ()=>{
-            filterListings(input);
-        })
-    })
-
-
-
-    // unit price listener
-    const min_unit_price = document.getElementById('min-unit-price');
-    const max_unit_price = document.getElementById('max-unit-price');
-
-    min_unit_price.addEventListener('input', removeNonNumeric, 500)
-    max_unit_price.addEventListener('input', removeNonNumeric, 500)
-
-
-})()
-
+// ######################### HELPERS ###################################
 
 
 function debounce(func, delay) {
-    let timeoutId;
-    return function(...args) {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-            func.apply(this, args);
-        }, delay);
-    };
+  let timeoutId;
+  return function (...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func.apply(this, args);
+    }, delay);
+  };
 }
-
 
 function getLowerAndUpperPrice(price) {
-    let [lower_range, upper_range] = price.split('-');
+  let [lower_range, upper_range] = price.split("-");
 
-    const convertToInteger = (priceStr) => {
-        priceStr = priceStr.trim().replace(/[$,]/g, ''); 
-        if (priceStr.includes('M')) {
-            return parseFloat(priceStr.replace('M', '')) * 1_000_000; 
-        }
-        return parseInt(priceStr); 
-    };
+  const convertToInteger = (priceStr) => {
+    priceStr = priceStr.trim().replace(/[$,]/g, "");
+    if (priceStr.includes("M")) {
+      return parseFloat(priceStr.replace("M", "")) * 1_000_000;
+    }
+    return parseInt(priceStr);
+  };
 
-    lower_range = ~~ convertToInteger(lower_range);
-    upper_range = upper_range ? ~~convertToInteger(upper_range) : ~~lower_range;
+  lower_range = ~~convertToInteger(lower_range);
+  upper_range = upper_range ? ~~convertToInteger(upper_range) : ~~lower_range;
 
-    return {
-        lower_range,
-        upper_range
-    };
+  return {
+    lower_range,
+    upper_range,
+  };
 }
 
+function extractUniqueRooms(arr) {
+  const roomSet = new Set(); // Use a Set to store unique values
 
+  arr
+    .filter((item) => item) // Remove empty strings
+    .forEach((item) => {
+      // Match the numbers in the string and sum them
+      const matches = item.match(/\d+/g);
+      if (matches) {
+        const totalRooms = matches.reduce(
+          (sum, num) => sum + parseInt(num, 10),
+          0
+        );
+        roomSet.add(totalRooms); // Add the sum to the Set
+      }
+    });
 
+  return Array.from(roomSet); // Convert the Set back to an array
+}
 
+function extractYear(dateString) {
+  if (!dateString) return null;
+  const yearMatch = dateString.match(/\b\d{4}\b/);
+  return yearMatch ? parseInt(yearMatch[0], 10) : null;
+}
+
+function extractUnitsNumber(str) {
+  const match = str.match(/(\d+)\s*units/i); // Match digits followed by "units"
+  return match ? parseInt(match[1], 10) : null; // Return the number or null if not found
+}
