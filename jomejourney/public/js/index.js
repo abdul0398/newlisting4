@@ -6,7 +6,6 @@ let names = [];
 (async () => {
   const data = await fetchListings();
   listings = data.listings;
-  console.log(listings)
   populateListings(listings);
   addFiltersEvent();
   populateFiltersValue();
@@ -265,11 +264,11 @@ function populateFiltersValue() {
 
 const filterListings = (input) => {
   const value_size_map = {
-    "1":"0-99",
-    "2":"100-399",
-    "3":"400-699",
-    "4":"700-999",
-    "5":"1000-10000000"
+    "1":{min:0, max:99},
+    "2":{min:100, max:399},
+    "3":{min:400, max:699},
+    "4":{min:700, max:999},
+    "5":{min:1000, max:1000000}
   }
   
   if (input) {
@@ -405,6 +404,7 @@ const filterListings = (input) => {
     }
   });
 
+
   const filter_listings = listings.filter((listing) => {
     if (
       project_names_checked.length == 0 &&
@@ -425,7 +425,8 @@ const filterListings = (input) => {
       uncompleted_checkbox == false &&
       min_completion_year == "" &&
       max_completion_year == "" && 
-      is_tenure_matched.length == 0
+      is_tenure_matched.length == 0 &&
+      size_inputs_checked.length == 0
     ) {
       return true;
     }
@@ -485,7 +486,6 @@ const filterListings = (input) => {
     const completion_year = extractYear(top?.para)
     const unit_numbs = extractUnitsNumber(size?.para || "");
 
-    console.log(unit_numbs)
 
     const is_name_found =
       project_names_checked.length === 0 ||
@@ -530,8 +530,14 @@ const filterListings = (input) => {
 
     const is_tenure_matched = tenure_inputs_checked.length == 0 || tenure_inputs_checked.includes(tenure.para);
 
+    let is_unit_number_matched = size_inputs_checked.length == 0?true: false;
     
-
+    size_inputs_checked.forEach(item=>{
+      const {min, max} = value_size_map[item]
+      if(unit_numbs >= min && unit_numbs <= max ){
+        is_unit_number_matched = true;
+      }
+    })
 
     return (
       is_name_found &&
@@ -551,7 +557,8 @@ const filterListings = (input) => {
       is_completed_matched &&
       is_min_comp_matched &&
       is_max_comp_matched && 
-      is_tenure_matched
+      is_tenure_matched && 
+      is_unit_number_matched
     );
   });
 
@@ -719,6 +726,8 @@ function removeFilter(btn) {
       filterListings(input);
     });
   });
+
+
 
 })();
 
