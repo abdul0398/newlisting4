@@ -232,7 +232,32 @@ function populateListing(listing){
        dev_desc.innerText = listing?.developer?.description || "";
 
 
+       const transactions = listing?.transactions;
 
+       const modifiedTrans = transactions.map(transaction=>{
+            const trans_date = transaction.Date;
+            const unit_name = transaction.UnitType;
+            const area = transaction.Size;
+            const psf = transaction.PSF;
+            const price = transaction.Price;
+            const block = transaction.Block;
+            const floor = transaction.Floor;
+            const stack = transaction.Stack;
+            const bedroom = transaction.UnitType;
+
+            return {
+                trans_date,
+                unit_name,
+                area,
+                psf,
+                price,
+                block,
+                floor,
+                stack,
+                bedroom
+            }
+       })
+       unit_st = modifiedTrans;
 }
 
 
